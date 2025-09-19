@@ -45,3 +45,17 @@ def eliminar_negocio(negocio_id: int, db: Session = Depends(get_db)):
     if not negocio:
         raise HTTPException(status_code=404, detail="Negocio no encontrado")
     return {"message": "Negocio eliminado correctamente"}
+
+
+#información de automoviles-
+@negocio_router.post("/autos/", response_model=schemas.AutoRead)
+def crear_auto_endpoint(auto: schemas.AutoCreate, db: Session = Depends(get_db)):
+    return services.crear_auto(db, auto)
+
+@negocio_router.get("/autos/", response_model=list[schemas.AutoRead])
+def listar_autos(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    return services.obtener_autos(db, skip=skip, limit=limit)
+
+@negocio_router.post("/autos/{id_auto}/detalles/", response_model=schemas.AutoDetalleRead)
+def agregar_detalle_auto(id_auto: int, detalle: schemas.AutoDetalleCreate, db: Session = Depends(get_db)):
+    return services.crear_detalle_auto(db, id_auto, detalle)

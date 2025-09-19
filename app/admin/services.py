@@ -45,3 +45,35 @@ def delete_negocio(db: Session, negocio_id: int):
     db.delete(db_negocio)
     db.commit()
     return db_negocio
+
+#servicios de autos
+def crear_auto(db: Session, auto: schemas.AutoCreate):
+    # Extraemos los detalles del schema (si existen)
+    detalles_data = auto.detalles_rel if auto.detalles_rel else []
+
+    # Creamos el auto sin los detalles
+    auto_data = auto.dict(exclude={"detalles_rel"})
+    nuevo_auto = models.Auto(**auto_data)
+    db.add(nuevo_auto)
+    db.commit()
+    db.refresh(nuevo_auto)
+
+    # Insertamos los detalles relacionados
+    for detalle in detalles_data:
+        nuevo_detalle = models.AutoDetalle(
+            id_auto=nuevo_auto.id_auto,
+            **detalle.dict()
+        )
+        db.add(nuevo_detalle)
+
+    db.commit()
+    db.refresh(nuevo_auto)
+    return nuevo_auto
+
+def obtener_autos(db: Session, skip: int = 0, limit: int = 10):
+    return (
+        db.query(models.Auto)
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
